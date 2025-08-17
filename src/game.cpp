@@ -25,6 +25,7 @@ void Game::initialize() {
 #endif
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_PROGRAM_POINT_SIZE);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -49,10 +50,10 @@ void Game::initialize() {
     this -> initialize_crosshair();
 
     // TEST
+
     // del s
     this -> context.mesh = mesh_read("assets/default/plane.obj");
-    // mesh_upload(&this -> context.mesh);
-
+    mesh_upload(&this -> context.mesh);
     this -> context.fabric.initialize(&this -> context.mesh);
 
     this -> time_between_frames = 0.16f; // del
@@ -82,16 +83,22 @@ void Game::update() {
         this -> context.shader.set_mat4("projection", projection);
         Mat4_t view = look_at(this -> camera.position, (this -> camera.position + this -> camera.target), this -> camera.head);
         this -> context.shader.set_mat4("view", view);
-        Mat4_t model = Mat4(1.0f);
-        model = translate(model, Vec3(0.0f, 0.0f, 1.0f));
-        this -> context.shader.set_mat4("model", model);
+        // Mat4_t model = Mat4(1.0f);
 
-        // mesh_draw(&this -> context.mesh);
-        this -> context.fabric.draw();
+        for (int i = 0; i < 8; i++) {
+            Mat4_t model = Mat4(1.0f);
+            model = translate(model, Vec3(-1.0f, 0.0f, (float) i));
+            // model = translate(model, Vec3(-1.0f, (float) i, 0.0f));
+            this -> context.shader.set_mat4("model", model);
+            // mesh_draw(&this -> context.mesh);
+            this -> context.fabric.draw();
+        }
+
+        // this -> context.fabric.draw();
 
         double mx, my; // mouse x/y
         glfwGetCursorPos(this -> context.window, &mx, &my);
-        this -> context.fabric.destroy(mx, my);
+        this -> context.fabric.destroy(view, projection, mx, my);
         // del e
 
         glfwSwapBuffers(this -> context.window);
