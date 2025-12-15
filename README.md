@@ -1,9 +1,5 @@
-# miniphysics
-Physics engine implemented in C++17.
-
-## Features
-### Fabric dynamics
-// gif
+# physar
+A physics engine.
 
 ## Dependencies
 ### Common
@@ -26,8 +22,8 @@ Physics engine implemented in C++17.
 ## Compiling
 #### Linux/macOS
 ```
-git clone https://github.com/filipswiszcz/miniphysics.git
-cd miniphysics
+git clone https://github.com/filipswiszcz/physar.git
+cd physar
 make build
 ```
 #### Windows
@@ -37,6 +33,6 @@ vcpkg integrate install
 > [!NOTE]
 > Above command is a one-time setup. It integrates vcpkg with Visual Studio to automatically use installed libraries.
 ```
-git clone https://github.com/filipswiszcz/miniphysics.git
+git clone https://github.com/filipswiszcz/physar.git
 Open project in `Microsoft Visual Studio` and build
 ```
