@@ -1,0 +1,18 @@
+
+BUILD SCRIPTS:
+- binaries and req assets are copied to bin/
+    - should i purge bin?
+- build happens in build/
+
+ops:
+- debug - with additional prints (DDEBUG) and compiler flags
+- dev - it builds/rebuilds project as efficient as possible
+- release - purges bin && build and builds
+
+bin/
+    res/
+        models/
+        shaders/
+        textures/
+    physar.exe
+build/
