@@ -18,12 +18,12 @@
 #define ENGINE_CYBERSPACE_HEIGHT 1000
 #define ENGINE_CYBERSPACE_DEPTH 1000
 
-typedef struct {
-    uint32_t width, height, depth;
-} Cyberspace_t;
+// typedef struct {
+//     uint32_t width, height, depth;
+// } Cyberspace_t;
 
 typedef struct {
-    Cyberspace_t cyberspace;
+    // Cyberspace_t cyberspace;
     GLFWwindow *window;
     uint32_t width, height;
     std::string name;
