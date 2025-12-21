@@ -15,19 +15,34 @@
 
 #include "math.h"
 
-namespace renderer {
+namespace Renderer {
+
+enum class ShaderStatus : uint8_t {
+    SUCCESS = 0,
+    FILE_NOT_FOUND,
+    COMPILATION_FAILED, // ..ING?
+    LINK_FAILED,
+    CREATION_FAILED
+};
 
 class Shader {
 public:
-    int32_t get_program() {return program;}
-    void create_program(std::string paths[2]);
+    Shader() : program(0) {
+        ids[0] = 0;
+        ids[1] = 0;
+    }
+    int32_t get_program() const {return program;}
+    ShaderStatus initialize(std::string paths[2]);
     void set_vec3(std::string name, Vec3_t vec);
     void set_mat4(std::string name, Mat4_t mat);
 private:
     int32_t ids[2]; // [0] = vert, [1] = frag
     int32_t program;
-    std::string read_file(std::string &path);
-    int32_t compile(uint32_t type, std::string &code);
+    std::string read(std::string &path);
+    // ShaderStatus read(std::string &path);
+    ShaderStatus compile(int32_t &id, uint32_t type, const std::string &code);
+    ShaderStatus link();
+    // ShaderStatus delete();
 };
 
 }

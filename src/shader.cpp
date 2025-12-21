@@ -2,42 +2,45 @@
 
 // public
 
-void renderer::Shader::create_program(std::string paths[2]) {
-    std::string vs_code = this->read_file(paths[0]);
-    std::string fs_code = this->read_file(paths[1]);
+Renderer::ShaderStatus Renderer::Shader::initialize(std::string paths[2]) {
+    std::string vs_code = this->read(paths[0]);
+    std::string fs_code = this->read(paths[1]);
 
-    // null code asserts
+    // empty code asserts
 
-    this->ids[0] = this->compile(GL_VERTEX_SHADER, vs_code);
-    this->ids[1] = this->compile(GL_FRAGMENT_SHADER, fs_code);
+    ShaderStatus vs_compile_status = this->compile(this->ids[0], GL_VERTEX_SHADER, vs_code);
+    if (vs_compile_status != ShaderStatus::SUCCESS) {
+        return vs_compile_status;
+    }
+    ShaderStatus fs_compile_status = this->compile(this->ids[1], GL_FRAGMENT_SHADER, fs_code);
+    if (fs_compile_status != ShaderStatus::SUCCESS) {
+        // delete vertex shader, because it went ok
+        return fs_compile_status;
+    }
 
     this->program = glCreateProgram();
+    if (this->program == 0) {
+        // delete shaders etc
+        return ShaderStatus::CREATION_FAILED;
+    }
+
     glAttachShader(this->program, this->ids[0]);
     glAttachShader(this->program, this->ids[1]);
 
-    glLinkProgram(this->program);
-
-    // int32_t params;
-    // glGetShaderiv(*id, GL_COMPILE_STATUS, &params);
-    // if (params == 0) {
-    //     char log[512]; // c_str()?
-    //     glGetShaderInfoLog(*id, 512, NULL, log);
-    //     printf("SHADER_COMPILE_ERROR: %s\n", log);
-    //     return;
-    // }
+    return this->link();
 }
 
-void renderer::Shader::set_vec3(std::string name, Vec3_t vec) {
+void Renderer::Shader::set_vec3(std::string name, Vec3_t vec) {
     glUniform3f(glGetUniformLocation(this->program, name.c_str()), vec.x, vec.y, vec.z);
 }
 
-void renderer::Shader::set_mat4(std::string name, Mat4_t mat) {
+void Renderer::Shader::set_mat4(std::string name, Mat4_t mat) {
     glUniformMatrix4fv(glGetUniformLocation(this->program, name.c_str()), 1, 0, &mat.m[0][0]);
 }
 
 // private
 
-std::string renderer::Shader::read_file(std::string &path) {
+std::string Renderer::Shader::read(std::string &path) {
     std::ifstream file(path, std::ios::in | std::ios::binary | std::ios::ate);
 
     // assert file open
@@ -52,12 +55,40 @@ std::string renderer::Shader::read_file(std::string &path) {
     return code;
 }
 
-int32_t renderer::Shader::compile(uint32_t type, std::string &code) {
-    int32_t shader = glCreateShader(type);
+Renderer::ShaderStatus Renderer::Shader::compile(int32_t &id, uint32_t type, const std::string &code) {
+    id = glCreateShader(type);
+    if (id == 0) {
+        return ShaderStatus::COMPILATION_FAILED;
+    }
+
     const char *source = code.c_str();
+    glShaderSource(id, 1, &source, nullptr);
 
-    glShaderSource(shader, 1, &source, NULL);
-    glCompileShader(shader);
+    glCompileShader(id);
 
-    return shader;
+    int32_t params;
+    glGetShaderiv(id, GL_COMPILE_STATUS, &params);
+    if (params == 0) {
+        // print error in DEBUG
+
+        glDeleteShader(id);
+        id = 0;
+
+        return ShaderStatus::COMPILATION_FAILED;
+    }
+
+    return ShaderStatus::SUCCESS;
+}
+
+Renderer::ShaderStatus Renderer::Shader::link() {
+    glLinkProgram(this->program);
+
+    int32_t params;
+    glGetProgramiv(this->program, GL_LINK_STATUS, &params);
+    if (params == 0) {
+        // print error in DEBUG
+        return ShaderStatus::LINK_FAILED;
+    }
+
+    return ShaderStatus::SUCCESS;
 }
