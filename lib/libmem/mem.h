@@ -10,10 +10,13 @@
 
 #if defined(__cplusplus)
     #define MEM_ARENA_DEFAULT_ALIGN alignof(std::max_align_t)
+    #define MEM_ARENA_HEAD_CAST(type, ptr) static_cast<type>(ptr)
 #elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(_MSC_VER)
     #define MEM_ARENA_DEFAULT_ALIGN _Alignof(max_align_t)
+    #define MEM_ARENA_HEAD_CAST(type, ptr) ((type) (ptr))
 #else
     #define MEM_ARENA_DEFAULT_ALIGN (2 * sizeof(void*))
+    #define MEM_ARENA_HEAD_CAST(type, ptr) ((type) (ptr))
 #endif
 
 #ifdef __cplusplus
@@ -26,7 +29,8 @@ typedef struct mem_arena {
 } mem_arena_t;
 
 static inline void mem_arena_init(mem_arena_t *arena, void *head, size_t capacity) {
-    arena->head = head;
+    // arena->head = (uint8_t*) head;
+    arena->head = MEM_ARENA_HEAD_CAST(uint8_t*, head);
     arena->used = 0;
     arena->capacity = capacity;
 }
